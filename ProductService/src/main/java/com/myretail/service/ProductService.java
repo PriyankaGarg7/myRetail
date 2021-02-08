@@ -1,13 +1,15 @@
 package com.myretail.service;
 
+import java.math.BigDecimal;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.myretail.exception.ProductNotFoundException;
+import com.myretail.model.Bonus;
+import com.myretail.model.CurentPrice;
 import com.myretail.model.MyRetailProduct;
 import com.myretail.model.Price;
 import com.myretail.model.RedSkyProduct;
@@ -21,7 +23,10 @@ public class ProductService {
 	RedSkyService redskyService;
 
 	@Autowired
-	PricingService pricingService;
+	MyRetailPricingService pricingService;
+
+	@Autowired
+	MyRetailBonusService bonusService;
 
 	@Autowired
 	RestTemplate restTemplate;
@@ -33,31 +38,45 @@ public class ProductService {
 		RedSkyProduct redskyProduct = redskyService.getProduct(productId);
 
 		Price price = pricingService.getPrice(productId);
+		
+		Bonus bonus = bonusService.getBonus(productId);
 
+		BigDecimal originalPrice = price.getOriginalPrice();
+		BigDecimal value = originalPrice.add(bonus.getBonus());
+
+		CurentPrice currentPrice = new CurentPrice(value, price.getCurrencyCode());
+				
 		MyRetailProduct myRetailProduct = new MyRetailProduct();
 		myRetailProduct.setId(redskyProduct.getProduct().getItem().getTcin());
 		myRetailProduct.setName(redskyProduct.getProduct().getItem().getProduct_description().getTitle());
-		myRetailProduct.setCurrentPrice(price);
+		myRetailProduct.setCurrentPrice(currentPrice);
 
+		
 		return myRetailProduct;
 	}
 
-	public void createProductPrice(Long productId, MyRetailProduct productPrice) {
+	public MyRetailProduct createProductPrice(MyRetailProduct productPrice) {
 
-		redskyService.getProduct(productId);
+		Long productId = productPrice.getId();
+		RedSkyProduct redskyProduct = redskyService.getProduct(productId);
+		Price price = pricingService.getPrice(productId);
+		
+		Bonus bonus = bonusService.createBonus(productPrice);
+		BigDecimal originalPrice = price.getOriginalPrice();
+		BigDecimal value = originalPrice.add(bonus.getBonus());
 
-		Price createPrice = new Price(productId, productPrice.getCurrentPrice().getValue(),
-				productPrice.getCurrentPrice().getCurrencyCode());
-
-		pricingService.createPrice(productId, createPrice);
+		CurentPrice currentPrice = new CurentPrice(value, price.getCurrencyCode());
+				
+		MyRetailProduct myRetailProduct = new MyRetailProduct();
+		myRetailProduct.setId(redskyProduct.getProduct().getItem().getTcin());
+		myRetailProduct.setName(redskyProduct.getProduct().getItem().getProduct_description().getTitle());
+		myRetailProduct.setCurrentPrice(currentPrice);
+		
+		return myRetailProduct;
 
 	}
 
 	public void updateProductPrice(Long productId, MyRetailProduct newProductPrice) {
-		Price updatePrice = new Price();
-		updatePrice.setValue(newProductPrice.getCurrentPrice().getValue());
-		updatePrice.setCurrencyCode(newProductPrice.getCurrentPrice().getCurrencyCode());
-		pricingService.updatePrice(productId, updatePrice);
+		bonusService.updatePrice(productId, newProductPrice);
 	}
-
 }

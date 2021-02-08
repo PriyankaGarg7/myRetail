@@ -10,12 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.myretail.exception.MyRetailProductResponseErrorHandler;
-import com.myretail.exception.ProductNotFoundException;
 import com.myretail.model.Item;
 import com.myretail.model.Product;
 import com.myretail.model.ProductDescription;
 import com.myretail.model.RedSkyProduct;
+import com.myretail.util.exceptions.NotFoundException;
 
 @Service
 public class RedSkyService {
@@ -45,11 +44,11 @@ public class RedSkyService {
 		try {
 			redSkyProduct = restTemplate.getForEntity(uri, RedSkyProduct.class);
 		} catch (RestClientException exc) {
-			throw new ProductNotFoundException("Product " + id + " is not available ");
+			throw new NotFoundException("Product " + id + " is not available ");
 		}	
 		
 		if(redSkyProduct.getStatusCode().equals(HttpStatus.NOT_FOUND))
-			throw new ProductNotFoundException("Product " + id + " is not available ");
+			throw new NotFoundException("Product " + id + " is not available ");
 		
 		return redSkyProduct.getBody();
 	}

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.myretail.model.MyRetailProduct;
-import com.myretail.model.Price;
 import com.myretail.service.ProductService;
 
 @RestController
@@ -35,8 +34,8 @@ public class ProductController {
 	}
 
 	@PostMapping("/{id}")
-	public ResponseEntity<Object> createPriceForProduct(@PathVariable("id") Long productId, @RequestBody MyRetailProduct productPrice) {
-		productService.createProductPrice(productId, productPrice);
+	public ResponseEntity<Object> createPriceForProduct(@RequestBody MyRetailProduct productPrice) {
+		productService.createProductPrice(productPrice);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand().toUri();
 		return ResponseEntity.created(location).build();
 	}

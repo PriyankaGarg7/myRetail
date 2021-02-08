@@ -1,12 +1,11 @@
 package com.myretail.service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.myretail.exception.PriceExistsException;
-import com.myretail.exception.PriceNotFoundException;
 import com.myretail.model.Price;
 import com.myretail.repository.PricingRepository;
 
@@ -18,38 +17,15 @@ public class PricingService {
 
 	public Price getPrice(Long productId) {
 
-		Optional<Price> price = priceRepository.findPriceByProductId(productId);
+		Optional<Price> resultPrice = priceRepository.findPriceByProductId(productId);
+		Price originalPrice = null;
 
-		if (!price.isPresent())
-			throw new PriceNotFoundException("Could not find the price for product " + productId);
+		if (!resultPrice.isPresent())
+			originalPrice = new Price(productId, BigDecimal.valueOf(10.00), "USD");
+		else
+			originalPrice = resultPrice.get();
 
-		return price.get();
+		return originalPrice;
+
 	}
-
-	public void createPrice(Long productId, Price price) {
-
-		Optional<Price> existingPrice = priceRepository.findPriceByProductId(productId);
-
-		if (existingPrice.isPresent())
-			throw new PriceExistsException("Price Already exists for " + productId);
-
-		Price createPrice = new Price(productId, price.getValue(), price.getCurrencyCode());
-
-		priceRepository.save(createPrice);
-		
-	}
-
-	public Price updatePrice(Long productId, Price price) {
-
-		Optional<Price> existingPrice = priceRepository.findPriceByProductId(productId);
-
-		if (!existingPrice.isPresent()) {
-			throw new PriceNotFoundException("productId- " +productId);
-		}
-
-		existingPrice.get().setBonus(price.getValue());
-
-		return priceRepository.save(existingPrice.get());
-	}
-
 }

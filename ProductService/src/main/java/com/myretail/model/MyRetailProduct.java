@@ -5,19 +5,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MyRetailProduct {
 	
 	Long Id;
+	
 	String name;
+	
 	@JsonProperty("current_price")
-	Price currentPrice;
+	CurentPrice currentPrice;
+	
+	
 
 	public MyRetailProduct() {
-		super();
+		
 	}
 
-	public MyRetailProduct(Long id, String name, Price price) {
-		super();
+	public MyRetailProduct(Long id, String name) {
 		Id = id;
 		this.name = name;
-		this.currentPrice = price;
 	}
 
 	public Long getId() {
@@ -35,19 +37,19 @@ public class MyRetailProduct {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public Price getCurrentPrice() {
+	
+	
+	public CurentPrice getCurrentPrice() {
 		return currentPrice;
 	}
 
-	public void setCurrentPrice(Price currentPrice) {
+	public void setCurrentPrice(CurentPrice currentPrice) {
 		this.currentPrice = currentPrice;
 	}
 
 	@Override
 	public String toString() {
 		return "{Id=" + Id + ", name=" + name + ", currentPrice=" + currentPrice + "]";
-	}
-	
+	}	
 
 }
